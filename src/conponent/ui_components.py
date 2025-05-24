@@ -68,7 +68,7 @@ def create_browser_config_section() -> ft.Column:
     """
     headless_checkbox = ft.Checkbox(
         label="ヘッドレスモード（ブラウザを表示せずに実行）",
-        value=True,
+        value=False,
     )
     keep_alive_checkbox = ft.Checkbox(
         label="keep-alive（ブラウザプロセスを維持）",
