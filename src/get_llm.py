@@ -1,16 +1,19 @@
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import SecretStr
 import os
+
 
 class LLMConfig:
     """
     Configuration class for LLM.
     """
-    def __init__(self, provider: str, model: str, api_key: str, api_base: str = None):
+
+    def __init__(self, provider: str, model: str, api_key: str):
         self.provider = provider
         self.model = model
         self.api_key = api_key
-        self.api_base = api_base
+
 
 def get_llm(config: LLMConfig):
     """
@@ -26,18 +29,23 @@ def get_llm(config: LLMConfig):
         case _:
             raise ValueError(f"Unsupported LLM provider: {config.provider}")
 
+
 def _get_openrouter_llm(
     model: str = "meta-llama/llama-4-maverick:free",
 ) -> ChatOpenAI:
     """
     Get the OpenRouter LLM instance.
     """
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise ValueError("OPENROUTER_API_KEYが環境変数に設定されていません")
     return ChatOpenAI(
-        model_name=model,
-        openai_api_key=os.getenv("OPENROUTER_API_KEY"),
-        openai_api_base="https://openrouter.ai/api/v1",
+        model=model,
+        api_key=SecretStr(api_key),
+        base_url="https://api.openrouter.ai/v1",
         temperature=0,
     )
+
 
 def _get_openai_llm(
     model: str = "gpt-3.5-turbo",
@@ -45,11 +53,15 @@ def _get_openai_llm(
     """
     Get the OpenAI LLM instance.
     """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEYが環境変数に設定されていません")
     return ChatOpenAI(
-        model_name=model,
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        model=model,
+        api_key=SecretStr(api_key),
         temperature=0,
     )
+
 
 def _get_google_llm(
     model: str = "gemini-2.0-flash",
@@ -57,8 +69,11 @@ def _get_google_llm(
     """
     Get the Google LLM instance.
     """
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEYが環境変数に設定されていません")
     return ChatGoogleGenerativeAI(
         model=model,
-        api_key=os.getenv("GOOGLE_API_KEY"),
+        api_key=SecretStr(api_key),
         temperature=0,
     )

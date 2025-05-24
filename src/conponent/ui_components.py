@@ -3,19 +3,27 @@ from typing import List
 import os
 from src.entity.controller_type import OutputFormat
 
-
-def create_instruction_field() -> ft.TextField:
-    """
-    インストラクションを入力するためのテキストフィールドを作成します
-    """
-    return ft.TextField(
-        label="インストラクション",
-        hint_text="Agentに実行させたい指示を入力してください",
-        multiline=True,
-        min_lines=3,
-        max_lines=5,
-        width=600,
-    )
+# 各種UI生成関数を分割ファイルからインポート
+from .ui_fields import (
+    create_instruction_field,
+    create_purpose_field,
+    create_detail_field,
+    create_reference_url_field,
+    create_api_key_field,
+    create_output_dir_field,
+)
+from .ui_dropdowns import (
+    create_llm_provider_dropdown,
+    create_llm_model_dropdown,
+    create_output_format_dropdown,
+)
+from .ui_data_items import (
+    create_data_items_row,
+    get_data_items_from_row,
+)
+from .ui_instruction import compose_instruction
+from .ui_buttons import create_submit_button
+from .ui_fields import create_browser_config_section
 
 
 def create_llm_provider_dropdown(providers: List[str]) -> ft.Dropdown:
@@ -37,29 +45,6 @@ def create_llm_model_dropdown() -> ft.Dropdown:
         label="LLMモデル",
         width=600,
         options=[],  # オプションは動的に設定されます
-    )
-
-
-def create_api_key_field(provider: str = None, visible: bool = True) -> ft.TextField:
-    """
-    APIキーを入力するためのテキストフィールドを作成します
-    provider: プロバイダー名（例: 'openai', 'google', 'openrouter'）
-    visible: 表示/非表示
-    """
-    env_key = None
-    if provider:
-        env_key = f"{provider.upper()}_API_KEY"
-    else:
-        env_key = "OPENAI_API_KEY"  # デフォルト
-    default_value = os.environ.get(env_key, "")
-    return ft.TextField(
-        label="APIキー",
-        hint_text="環境変数が設定されている場合は空のままでもOK",
-        password=True,
-        can_reveal_password=True,
-        width=600,
-        value=default_value,
-        visible=visible,
     )
 
 
@@ -92,18 +77,6 @@ def create_output_format_dropdown() -> ft.Dropdown:
     )
 
 
-def create_output_dir_field() -> ft.TextField:
-    """
-    出力ディレクトリを入力するためのテキストフィールドを作成します
-    """
-    return ft.TextField(
-        label="出力ディレクトリ",
-        hint_text="結果を保存するディレクトリ",
-        width=600,
-        value="output",
-    )
-
-
 def create_submit_button() -> ft.ElevatedButton:
     """
     実行ボタンを作成します
@@ -118,86 +91,6 @@ def create_submit_button() -> ft.ElevatedButton:
         ),
         icon=ft.Icons.PLAY_ARROW,
     )
-
-
-def create_purpose_field() -> ft.TextField:
-    """
-    目的を入力するためのテキストフィールドを作成します
-    """
-    return ft.TextField(
-        label="目的",
-        hint_text="Agentに実行させたい目的を入力してください",
-        multiline=True,
-        min_lines=1,
-        max_lines=2,
-        width=600,
-    )
-
-
-def create_detail_field() -> ft.TextField:
-    """
-    詳細を入力するためのテキストフィールドを作成します
-    """
-    return ft.TextField(
-        label="詳細",
-        hint_text="タスクの詳細や条件などを入力してください",
-        multiline=True,
-        min_lines=2,
-        max_lines=5,
-        width=600,
-    )
-
-
-def create_reference_url_field() -> ft.TextField:
-    """
-    参考URLを入力するためのテキストフィールドを作成します
-    """
-    return ft.TextField(
-        label="参考URL",
-        hint_text="参考となるURLがあれば入力してください（任意）",
-        multiline=False,
-        width=600,
-    )
-
-
-def create_data_items_row(data_items: list[str], on_change) -> ft.Row:
-    """
-    データ項目を入力するRowを作成します。
-    data_items: 現在のデータ項目リスト
-    on_change: 入力値が変わったときのコールバック
-    """
-    fields = []
-    for i, value in enumerate(data_items):
-        fields.append(
-            ft.TextField(
-                label=f"データ項目{i+1}",
-                value=value,
-                width=200,
-                on_change=lambda e, idx=i: on_change(e, idx),
-            )
-        )
-    # 最後の欄が空でなければ新しい欄を追加
-    if not data_items or data_items[-1] != "":
-        fields.append(
-            ft.TextField(
-                label=f"データ項目{len(data_items)+1}",
-                value="",
-                width=200,
-                on_change=lambda e, idx=len(data_items): on_change(e, idx),
-            )
-        )
-    return ft.Row(controls=fields, spacing=10)
-
-
-def get_data_items_from_row(row: ft.Row) -> list[str]:
-    """
-    Rowからデータ項目の値リストを取得します（空欄は除外）。
-    """
-    return [
-        f.value
-        for f in row.controls
-        if isinstance(f, ft.TextField) and f.value is not None and f.value.strip() != ""
-    ]
 
 
 def compose_instruction(

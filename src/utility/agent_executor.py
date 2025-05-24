@@ -23,14 +23,22 @@ def execute_agent(
     エージェントを取得して実行します
     """
     try:
-        # エージェントの取得
-        agent = get_agent(
-            instruction=instruction,
-            llm_config=llm_config,
-            browser_profile=browser_profile,
-            output_format=output_format,
-            output_dir=output_dir,
-        )
+        try:
+            agent = get_agent(
+                instruction=instruction,
+                llm_config=llm_config,
+                browser_profile=browser_profile,
+                output_format=output_format,
+                output_dir=output_dir,
+            )
+        except ValueError as ve:
+            error_msg = f"エージェント初期化エラー: {str(ve)}\n{traceback.format_exc()}"
+            sys.stderr.write(error_msg + "\n")
+            raise ve
+        except Exception as e:
+            error_msg = f"エージェント初期化エラー: {str(e)}\n{traceback.format_exc()}"
+            sys.stderr.write(error_msg + "\n")
+            raise e
 
         # エージェントの実行
         # agent.runは非同期関数である可能性があるので、適切に扱う

@@ -5,17 +5,18 @@ from typing import List
 def create_page_content(
     title: str,
     subtitle: str,
-    instruction_section: List[ft.Control],
-    llm_section: List[ft.Control],
-    browser_section: List[ft.Control],
-    controller_section: List[ft.Control],
-    output_section: List[ft.Control],
-    button_section: List[ft.Control],
-    result_section: List[ft.Control],
+    instruction_section: list[ft.Control],
+    llm_section: list[ft.Control],
+    browser_section: list[ft.Control],
+    controller_section: list[ft.Control],
+    output_section: list[ft.Control],
+    button_section: list[ft.Control],
+    result_section: list[ft.Control],
 ) -> ft.Column:
     """
     ページ全体のレイアウトを作成します
     """
+    instruction_controls = instruction_section.copy()
     return ft.Column(
         controls=[
             # ヘッダー
@@ -29,7 +30,7 @@ def create_page_content(
                 padding=ft.padding.only(bottom=20),
             ),
             # インストラクションセクション
-            create_section("インストラクション", instruction_section),
+            create_section("インストラクション", instruction_controls),
             # LLM設定セクション
             create_section("LLM設定", llm_section),
             # ブラウザ設定セクション
