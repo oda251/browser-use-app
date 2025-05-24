@@ -1,7 +1,6 @@
-flet
+flet[all]
 PyInstaller
 dotenv
 langchain-openai
 langchain-google-genai
-browser-use
 browser-use[memory]
