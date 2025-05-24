@@ -160,32 +160,81 @@ def create_reference_url_field() -> ft.TextField:
     )
 
 
+def create_data_items_row(data_items: list[str], on_change) -> ft.Row:
+    """
+    データ項目を入力するRowを作成します。
+    data_items: 現在のデータ項目リスト
+    on_change: 入力値が変わったときのコールバック
+    """
+    fields = []
+    for i, value in enumerate(data_items):
+        fields.append(
+            ft.TextField(
+                label=f"データ項目{i+1}",
+                value=value,
+                width=200,
+                on_change=lambda e, idx=i: on_change(e, idx),
+            )
+        )
+    # 最後の欄が空でなければ新しい欄を追加
+    if not data_items or data_items[-1] != "":
+        fields.append(
+            ft.TextField(
+                label=f"データ項目{len(data_items)+1}",
+                value="",
+                width=200,
+                on_change=lambda e, idx=len(data_items): on_change(e, idx),
+            )
+        )
+    return ft.Row(controls=fields, spacing=10)
+
+
+def get_data_items_from_row(row: ft.Row) -> list[str]:
+    """
+    Rowからデータ項目の値リストを取得します（空欄は除外）。
+    """
+    return [
+        f.value
+        for f in row.controls
+        if isinstance(f, ft.TextField) and f.value is not None and f.value.strip() != ""
+    ]
+
+
 def compose_instruction(
     purpose: str,
     detail: str,
     reference_url: str | None,
     controller_type: OutputFormat | None,
+    data_items: list[str] | None = None,
 ) -> str:
     """
-    目的・詳細・参考URLから自然な指示文を生成します。
+    目的・詳細・参考URL・データ項目・出力形式から自然な指示文を生成します。
     空欄は無視し、必要な部分のみを含めます。
     """
     parts = []
     if purpose:
-        parts.append(f"目的: {purpose}")
+        parts.append(f"【目的】\n{purpose}")
     if detail:
-        parts.append(f"詳細: {detail}")
+        parts.append(f"【詳細】\n{detail}")
     if reference_url:
-        parts.append(f"参考URL: {reference_url}")
+        parts.append(f"【参考URL】\n{reference_url}")
+    if data_items:
+        filtered = [item for item in data_items if item.strip() != ""]
+        if filtered:
+            parts.append("【データ項目】\n- " + "\n- ".join(filtered))
     if controller_type:
         match controller_type:
             case OutputFormat.MARKDOWN:
-                parts.append("出力形式: Markdown")
+                parts.append(
+                    "【出力形式】\n出力は見やすく構造化されたMarkdown形式で作成してください。必要に応じて見出しやリスト、テーブルを活用し、情報を整理してください。ファイルとして保存してください。"
+                )
             case OutputFormat.CSV:
-                parts.append("出力形式: CSV")
+                parts.append(
+                    """【出力形式】
+出力はCSV形式で作成してください。カラム名は上記データ項目に従い、各行のデータがカラムと正しく対応するようにしてください。カラム名は1行目に記載し、データは2行目以降に記載してください。ファイルとして保存してください。"""
+                )
             case OutputFormat.TEXT:
-                parts.append("出力形式: プレーンテキスト")
-            case _:
-                parts.append(f"出力形式: {controller_type.value}")
-        parts.append("出力は指定された形式でファイルに保存してください。")
-    return "\n".join(parts)
+                parts.append(
+                    "【出力形式】\n出力はプレーンテキスト形式で作成してください。必要に応じて改行やインデントで情報を整理してください。ファイルとして保存してください。"
+                )
+    return "\n\n".join(parts)

@@ -12,6 +12,7 @@ from src.conponent.ui_components import (
     create_output_format_dropdown,
     create_output_dir_field,
     create_submit_button,
+    create_data_items_row,
 )
 from src.conponent.page_layout import create_page_content
 from src.utility.event_handlers import (
@@ -62,6 +63,31 @@ def main(page: ft.Page):
     status_text = ft.Text("", size=16)
     result_text = ft.Text("", size=16)
 
+    # データ項目の状態管理
+    data_items = [""]
+    data_items_row = None  # 後で初期化
+
+    def on_data_item_change(e, idx):
+        nonlocal data_items, data_items_row
+        value = e.control.value
+        # 入力値を更新
+        if idx < len(data_items):
+            data_items[idx] = value
+        else:
+            data_items.append(value)
+        # 空欄を除外し、最後が空でなければ空欄を追加
+        data_items = [v for v in data_items]
+        if not data_items or data_items[-1] != "":
+            data_items.append("")
+        # Rowを再生成
+        data_items_row.controls = create_data_items_row(
+            data_items, on_data_item_change
+        ).controls
+        page.update()
+
+    # 初期Row生成
+    data_items_row = create_data_items_row(data_items, on_data_item_change)
+
     # イベントハンドラの設定
     provider_changed = create_provider_changed_handler(
         llm_provider_dropdown, llm_model_dropdown, LLM_MODELS, page
@@ -96,7 +122,6 @@ def main(page: ft.Page):
 
     button_clicked = create_execute_button_handler(
         page=page,
-        # instruction_field=instruction_field,  # 分割したので削除
         purpose_field=purpose_field,
         detail_field=detail_field,
         reference_url_field=reference_url_field,
@@ -110,6 +135,7 @@ def main(page: ft.Page):
         progress_bar=progress_bar,
         status_text=status_text,
         result_text=result_text,
+        data_items_row=data_items_row,
     )
 
     # 実行ボタン
@@ -125,10 +151,11 @@ def main(page: ft.Page):
             detail_field,
             reference_url_field,
             output_format_dropdown,
+            data_items_row=data_items_row,
         ],
         llm_section=[llm_provider_dropdown, llm_model_dropdown, api_key_field],
         browser_section=[browser_config_row],
-        controller_section=[],  # コントローラー設定セクションは不要
+        controller_section=[],
         output_section=[output_dir_field],
         button_section=[submit_button, progress_bar, status_text],
         result_section=[result_text],

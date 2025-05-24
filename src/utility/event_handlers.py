@@ -54,6 +54,7 @@ def create_execute_button_handler(
     progress_bar: ft.ProgressBar,
     status_text: ft.Text,
     result_text: ft.Text,
+    data_items_row: ft.Row,  # 追加
 ):
     """
     実行ボタンクリック時のイベントハンドラを作成します
@@ -110,11 +111,16 @@ def create_execute_button_handler(
         )
 
         # インストラクションを合成
+        from src.conponent.ui_components import get_data_items_from_row
+
+        # データ項目の取得
+        data_items = get_data_items_from_row(data_items_row)
         instruction = compose_instruction(
             purpose_field.value,
             detail_field.value,
             reference_url_field.value,
             selected_output_format,
+            data_items=data_items,
         )
         try:
             from src.utility.agent_executor import execute_agent
