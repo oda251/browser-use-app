@@ -1,6 +1,5 @@
 import flet as ft
 import os
-import asyncio
 import sys
 import traceback
 from typing import Dict, List
@@ -8,6 +7,7 @@ from typing import Dict, List
 # 最初にプロジェクトのルートディレクトリをパスに追加
 import sys
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from src.entity.controller_type import ControllerType
@@ -52,6 +52,7 @@ def create_execute_button_handler(
     llm_model_dropdown: ft.Dropdown,
     api_key_field: ft.TextField,
     headless_checkbox: ft.Checkbox,
+    keep_alive_checkbox: ft.Checkbox,
     controller_type_checkboxes: ft.Row,
     output_dir_field: ft.TextField,
     progress_bar: ft.ProgressBar,
@@ -113,7 +114,9 @@ def create_execute_button_handler(
         # ブラウザ設定
         from browser_use import BrowserConfig
 
-        browser_config = BrowserConfig(headless=headless_checkbox.value)
+        browser_config = BrowserConfig(
+            headless=headless_checkbox.value, keep_alive=keep_alive_checkbox.value
+        )
 
         try:
             # エージェントの取得
@@ -135,7 +138,7 @@ def create_execute_button_handler(
                     result = execute_agent(
                         instruction=instruction_field.value,
                         llm_config=llm_config,
-                        browser_config=browser_config,
+                        browser_profile=browser_config,
                         controller_types=selected_controller_types,
                         output_dir=output_dir_field.value,
                     )
@@ -146,7 +149,7 @@ def create_execute_button_handler(
                         result_text.value = f"Agentの実行が完了しました。出力は {output_dir_field.value} ディレクトリに保存されています。"
                         progress_bar.visible = False
                         page.update()
-                    
+
                     # メインスレッドでUIを更新
                     page.window_to_front = True  # ウィンドウを前面に
                     on_complete()  # 直接呼び出し
@@ -154,7 +157,7 @@ def create_execute_button_handler(
                     # エラーをstderrに出力
                     error_details = traceback.format_exc()
                     sys.stderr.write(f"エラー発生: {str(ex)}\n{error_details}\n")
-                    
+
                     # エラー発生時の処理
                     def on_error():
                         status_text.value = "エラーが発生しました"
@@ -173,7 +176,7 @@ def create_execute_button_handler(
             # エラーをstderrに出力
             error_details = traceback.format_exc()
             sys.stderr.write(f"初期化エラー: {str(e)}\n{error_details}\n")
-            
+
             status_text.value = "エラーが発生しました"
             result_text.value = f"エラー: {str(e)}\nコンソールの詳細なエラーメッセージを確認してください。"
             progress_bar.visible = False

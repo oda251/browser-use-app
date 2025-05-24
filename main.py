@@ -46,7 +46,9 @@ def main(page: ft.Page):
     # APIキー欄は最初は非表示
     api_key_field = create_api_key_field(visible=False)
 
-    headless_checkbox = create_browser_config_section()
+    browser_config_row = create_browser_config_section()
+    headless_checkbox = browser_config_row.controls[0]
+    keep_alive_checkbox = browser_config_row.controls[1]
 
     controller_type_checkboxes = create_controller_type_checkboxes()
 
@@ -67,8 +69,7 @@ def main(page: ft.Page):
         selected_provider = llm_provider_dropdown.value
         # モデルの選択肢を更新
         llm_model_dropdown.options = [
-            ft.dropdown.Option(model)
-            for model in LLM_MODELS.get(selected_provider, [])
+            ft.dropdown.Option(model) for model in LLM_MODELS.get(selected_provider, [])
         ]
         if llm_model_dropdown.options:
             llm_model_dropdown.value = llm_model_dropdown.options[0].key
@@ -97,6 +98,7 @@ def main(page: ft.Page):
         llm_model_dropdown=llm_model_dropdown,
         api_key_field=api_key_field,
         headless_checkbox=headless_checkbox,
+        keep_alive_checkbox=keep_alive_checkbox,  # 追加
         controller_type_checkboxes=controller_type_checkboxes,
         output_dir_field=output_dir_field,
         progress_bar=progress_bar,
@@ -114,7 +116,7 @@ def main(page: ft.Page):
         subtitle="AIエージェントのインストラクションと設定",
         instruction_section=[instruction_field],
         llm_section=[llm_provider_dropdown, llm_model_dropdown, api_key_field],
-        browser_section=[headless_checkbox],
+        browser_section=[browser_config_row],
         controller_section=[controller_type_checkboxes],
         output_section=[output_dir_field],
         button_section=[submit_button, progress_bar, status_text],

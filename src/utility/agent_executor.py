@@ -15,7 +15,7 @@ from typing import List
 def execute_agent(
     instruction: str,
     llm_config: LLMConfig,
-    browser_config: BrowserConfig,
+    browser_profile: BrowserConfig,
     controller_types: List[ControllerType],
     output_dir: str,
 ):
@@ -27,7 +27,7 @@ def execute_agent(
         agent = get_agent(
             instruction=instruction,
             llm_config=llm_config,
-            browser_config=browser_config,
+            browser_profile=browser_profile,
             controller_types=controller_types,
             output_dir=output_dir,
         )

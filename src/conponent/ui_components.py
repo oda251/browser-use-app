@@ -62,14 +62,19 @@ def create_api_key_field(provider: str = None, visible: bool = True) -> ft.TextF
     )
 
 
-def create_browser_config_section() -> ft.Checkbox:
+def create_browser_config_section() -> ft.Column:
     """
-    ブラウザの設定を行うためのチェックボックスを作成します
+    ブラウザの設定を行うためのチェックボックス群を作成します
     """
-    return ft.Checkbox(
+    headless_checkbox = ft.Checkbox(
         label="ヘッドレスモード（ブラウザを表示せずに実行）",
         value=True,
     )
+    keep_alive_checkbox = ft.Checkbox(
+        label="keep-alive（ブラウザプロセスを維持）",
+        value=True,
+    )
+    return ft.Column(controls=[headless_checkbox, keep_alive_checkbox], spacing=20)
 
 
 def create_controller_type_checkboxes() -> ft.Row:
