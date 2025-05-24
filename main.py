@@ -40,7 +40,9 @@ def main(page: ft.Page):
     instruction_field = create_instruction_field()
 
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
+    # LLMモデル欄は最初は非表示
     llm_model_dropdown = create_llm_model_dropdown()
+    llm_model_dropdown.visible = False
     # APIキー欄は最初は非表示
     api_key_field = create_api_key_field(visible=False)
 
@@ -70,8 +72,10 @@ def main(page: ft.Page):
         ]
         if llm_model_dropdown.options:
             llm_model_dropdown.value = llm_model_dropdown.options[0].key
+            llm_model_dropdown.visible = True
         else:
             llm_model_dropdown.value = None
+            llm_model_dropdown.visible = False
         # APIキー欄の表示・値を切り替え
         if selected_provider:
             api_key_field.visible = True
