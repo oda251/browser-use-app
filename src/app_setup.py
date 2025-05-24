@@ -35,7 +35,7 @@ def setup_app(page: ft.Page):
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     llm_model_dropdown = create_llm_model_dropdown()
     llm_model_dropdown.visible = False
-    api_key_field = create_api_key_field(visible=False)
+    api_key_field = create_api_key_field(provider="", visible=False)
     browser_config_row = create_browser_config_section()
     headless_checkbox = browser_config_row.controls[0]
     keep_alive_checkbox = browser_config_row.controls[1]
