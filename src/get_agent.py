@@ -1,13 +1,14 @@
 from browser_use import Agent, BrowserConfig
 from src.get_llm import LLMConfig, get_llm
-from typing import List
-from src.get_controller import get_controller, ControllerType
+from src.get_controller import get_controller
+from src.entity.controller_type import OutputFormat
+
 
 def get_agent(
     instruction: str,
     llm_config: LLMConfig,
     browser_profile: BrowserConfig,
-    controller_types: List[ControllerType] = [ControllerType.MARKDOWN],
+    output_format: OutputFormat = OutputFormat.MARKDOWN,
     output_dir: str = "output",
 ) -> Agent[None]:
     """
@@ -17,8 +18,8 @@ def get_agent(
         task=instruction,
         llm=get_llm(config=llm_config),
         controller=get_controller(
-            controller_types=controller_types,
+            output_format=output_format,
             ouput_dir=output_dir,
         ),
-        browser_profile=browser_profile
+        browser_profile=browser_profile,
     )

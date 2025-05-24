@@ -1,8 +1,11 @@
 from enum import Enum
 
-class ControllerType(Enum):
+
+class OutputFormat(Enum):
     """
-    Enum for different controller types.
+    Enum for different output formats.
     """
+
     MARKDOWN = "markdown"
-    IMAGE = "image"
+    CSV = "csv"
+    TEXT = "text"

@@ -5,9 +5,9 @@ from pathlib import Path
 # 最初にプロジェクトのルートディレクトリをパスに追加
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
+from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig
 from src.get_llm import LLMConfig
-from src.entity.controller_type import ControllerType
 from src.get_agent import get_agent
 from typing import List
 
@@ -16,7 +16,7 @@ def execute_agent(
     instruction: str,
     llm_config: LLMConfig,
     browser_profile: BrowserConfig,
-    controller_types: List[ControllerType],
+    output_format: OutputFormat,
     output_dir: str,
 ):
     """
@@ -28,7 +28,7 @@ def execute_agent(
             instruction=instruction,
             llm_config=llm_config,
             browser_profile=browser_profile,
-            controller_types=controller_types,
+            output_format=output_format,
             output_dir=output_dir,
         )
 
@@ -37,7 +37,7 @@ def execute_agent(
         try:
             import asyncio
             import inspect
-            
+
             # agentのrunメソッドが非同期かどうかをチェック
             if inspect.iscoroutinefunction(agent.run):
                 # 非同期関数の場合
@@ -47,18 +47,20 @@ def execute_agent(
                 except RuntimeError:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-                
+
                 # 非同期関数を実行
                 if loop.is_running():
                     # すでにイベントループが実行中の場合
-                    result = asyncio.run_coroutine_threadsafe(agent.run(), loop).result()
+                    result = asyncio.run_coroutine_threadsafe(
+                        agent.run(), loop
+                    ).result()
                 else:
                     # イベントループが実行中でない場合
                     result = loop.run_until_complete(agent.run())
             else:
                 # 同期関数の場合は普通に実行
                 result = agent.run()
-                
+
             return result
         except AttributeError:
             # agent.runが存在しない場合

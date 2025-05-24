@@ -2,12 +2,14 @@ from dotenv import load_dotenv
 import flet as ft
 
 from src.conponent.ui_components import (
-    create_instruction_field,
+    create_purpose_field,
+    create_detail_field,
+    create_reference_url_field,
     create_llm_provider_dropdown,
     create_llm_model_dropdown,
     create_api_key_field,
     create_browser_config_section,
-    create_controller_type_checkboxes,
+    create_output_format_dropdown,
     create_output_dir_field,
     create_submit_button,
 )
@@ -34,10 +36,13 @@ LLM_MODELS = {
 def main(page: ft.Page):
     # ページの設定
     page.title = "Browser-Use Agent GUI"
-    page.scroll = "auto"
+    page.scroll = ft.ScrollMode.AUTO
 
     # UI要素の作成
-    instruction_field = create_instruction_field()
+    purpose_field = create_purpose_field()
+    detail_field = create_detail_field()
+    reference_url_field = create_reference_url_field()
+    output_format_dropdown = create_output_format_dropdown()
 
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     # LLMモデル欄は最初は非表示
@@ -49,8 +54,6 @@ def main(page: ft.Page):
     browser_config_row = create_browser_config_section()
     headless_checkbox = browser_config_row.controls[0]
     keep_alive_checkbox = browser_config_row.controls[1]
-
-    controller_type_checkboxes = create_controller_type_checkboxes()
 
     output_dir_field = create_output_dir_field()
 
@@ -93,13 +96,16 @@ def main(page: ft.Page):
 
     button_clicked = create_execute_button_handler(
         page=page,
-        instruction_field=instruction_field,
+        # instruction_field=instruction_field,  # 分割したので削除
+        purpose_field=purpose_field,
+        detail_field=detail_field,
+        reference_url_field=reference_url_field,
         llm_provider_dropdown=llm_provider_dropdown,
         llm_model_dropdown=llm_model_dropdown,
         api_key_field=api_key_field,
         headless_checkbox=headless_checkbox,
         keep_alive_checkbox=keep_alive_checkbox,  # 追加
-        controller_type_checkboxes=controller_type_checkboxes,
+        output_format_dropdown=output_format_dropdown,
         output_dir_field=output_dir_field,
         progress_bar=progress_bar,
         status_text=status_text,
@@ -114,10 +120,15 @@ def main(page: ft.Page):
     page_content = create_page_content(
         title="Browser-Use Agent GUI",
         subtitle="AIエージェントのインストラクションと設定",
-        instruction_section=[instruction_field],
+        instruction_section=[
+            purpose_field,
+            detail_field,
+            reference_url_field,
+            output_format_dropdown,
+        ],
         llm_section=[llm_provider_dropdown, llm_model_dropdown, api_key_field],
         browser_section=[browser_config_row],
-        controller_section=[controller_type_checkboxes],
+        controller_section=[],  # コントローラー設定セクションは不要
         output_section=[output_dir_field],
         button_section=[submit_button, progress_bar, status_text],
         result_section=[result_text],
