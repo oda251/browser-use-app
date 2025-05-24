@@ -18,7 +18,7 @@ def get_agent(
         task=instruction,
         llm=get_llm(config=llm_config),
         controller=get_controller(
-            contoller_types=controller_types,
+            controller_types=controller_types,
             ouput_dir=output_dir,
         ),
         browser=Browser(config=browser_config),

@@ -4,7 +4,7 @@ import os
 from src.entity.controller_type import ControllerType
 
 def get_controller(
-        contoller_types: List[ControllerType] = [ControllerType.MARKDOWN],
+        controller_types: List[ControllerType] = [ControllerType.MARKDOWN],
         ouput_dir: str = "output",
 ):
     """
@@ -14,7 +14,7 @@ def get_controller(
         os.makedirs(ouput_dir)
     controller = Controller()
 
-    for controller_type in contoller_types:
+    for controller_type in controller_types:
         match controller_type:
             case ControllerType.MARKDOWN:
                 @controller.action("Document a file in markdown format")
