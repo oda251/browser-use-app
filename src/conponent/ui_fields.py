@@ -44,7 +44,7 @@ def create_reference_url_field() -> ft.TextField:
     )
 
 
-def create_api_key_field(provider: str = None, visible: bool = True) -> ft.TextField:
+def create_api_key_field(provider: str, visible: bool = True) -> ft.TextField:
     env_key = f"{provider.upper()}_API_KEY" if provider else "OPENAI_API_KEY"
     default_value = os.environ.get(env_key, "")
     return ft.TextField(
