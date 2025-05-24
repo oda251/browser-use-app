@@ -1,4 +1,5 @@
 import flet as ft
+from flet.core.control_event import ControlEvent
 from src.conponent.ui_components import (
     create_purpose_field,
     create_detail_field,
@@ -45,7 +46,7 @@ def setup_app(page: ft.Page):
     data_items = [""]
     data_items_row = None
 
-    def on_data_item_change(e, idx):
+    def on_data_item_submit(e: ControlEvent, idx):
         nonlocal data_items, data_items_row
         value = e.control.value
         if idx < len(data_items):
@@ -56,11 +57,12 @@ def setup_app(page: ft.Page):
         if not data_items or data_items[-1] != "":
             data_items.append("")
         data_items_row.controls = create_data_items_row(
-            data_items, on_data_item_change
+            data_items, on_data_item_submit
         ).controls
         page.update()
+        data_items_row.controls[-1].focus()
 
-    data_items_row = create_data_items_row(data_items, on_data_item_change)
+    data_items_row = create_data_items_row(data_items, on_data_item_submit)
     provider_changed = create_provider_changed_handler(
         llm_provider_dropdown, llm_model_dropdown, LLM_MODELS, page
     )

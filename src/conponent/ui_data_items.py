@@ -1,7 +1,7 @@
 import flet as ft
 
 
-def create_data_items_row(data_items: list[str], on_change) -> ft.Row:
+def create_data_items_row(data_items: list[str], on_submit) -> ft.Row:
     fields = []
     for i, value in enumerate(data_items):
         fields.append(
@@ -9,7 +9,7 @@ def create_data_items_row(data_items: list[str], on_change) -> ft.Row:
                 label=f"データ項目{i+1}",
                 value=value,
                 width=200,
-                on_change=lambda e, idx=i: on_change(e, idx),
+                on_submit=lambda e, idx=i: on_submit(e, idx),
             )
         )
     if not data_items or data_items[-1] != "":
@@ -18,7 +18,7 @@ def create_data_items_row(data_items: list[str], on_change) -> ft.Row:
                 label=f"データ項目{len(data_items)+1}",
                 value="",
                 width=200,
-                on_change=lambda e, idx=len(data_items): on_change(e, idx),
+                on_submit=lambda e, idx=len(data_items): on_submit(e, idx),
             )
         )
     return ft.Row(controls=fields, spacing=10)
