@@ -13,8 +13,15 @@ def create_instruction_field() -> ft.TextField:
     )
 
 
+def _expand_lines(e, min_lines, max_lines):
+    field = e.control
+    field.min_lines = min_lines
+    field.max_lines = max_lines
+    field.update()
+
+
 def create_purpose_field() -> ft.TextField:
-    return ft.TextField(
+    field = ft.TextField(
         label="目的",
         hint_text="Agentに実行させたい目的を入力してください",
         multiline=True,
@@ -22,17 +29,21 @@ def create_purpose_field() -> ft.TextField:
         max_lines=2,
         width=600,
     )
+    field.on_focus = lambda e: _expand_lines(e, 2, 6)
+    field.on_blur = lambda e: _expand_lines(e, 1, 1)
+    return field
 
 
 def create_detail_field() -> ft.TextField:
-    return ft.TextField(
+    field = ft.TextField(
         label="詳細",
         hint_text="タスクの詳細や条件などを入力してください",
         multiline=True,
-        min_lines=2,
-        max_lines=5,
         width=600,
     )
+    field.on_focus = lambda e: _expand_lines(e, 5, 15)
+    field.on_blur = lambda e: _expand_lines(e, 1, 1)
+    return field
 
 
 def create_reference_url_field() -> ft.TextField:
@@ -77,3 +88,22 @@ def create_browser_config_section() -> ft.Column:
         value=True,
     )
     return ft.Column(controls=[headless_checkbox, keep_alive_checkbox], spacing=20)
+
+
+def create_common_instruction_field() -> ft.TextField:
+    field = ft.TextField(
+        label="共通指示",
+        hint_text="毎回共通でAgentに伝えたい指示",
+        multiline=True,
+        min_lines=1,
+        max_lines=1,
+        width=600,
+        value="""あなたはスクレイピングを行うエージェントです。必要な情報を収集し、指定された形式で結果を出力してください。
+始めに訪れたページで情報が不十分だった場合は、適宜リンクをたどって追加情報を収集してください。リンクをクリックする際は、必ず新しいタブで開いてください。
+指示を受けたら、まず保存先のファイルを作成し、そのファイルのパスは最後まで必ず保持してください。収集した情報が50行を超える場合は都度保存し、記憶が大きくなることを避けてください。
+""",
+        visible=True,
+    )
+    field.on_focus = lambda e: _expand_lines(e, 3, 10)
+    field.on_blur = lambda e: _expand_lines(e, 1, 1)
+    return field

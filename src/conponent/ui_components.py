@@ -11,6 +11,7 @@ from .ui_fields import (
     create_reference_url_field,
     create_api_key_field,
     create_output_dir_field,
+    create_common_instruction_field,
 )
 from .ui_dropdowns import (
     create_llm_provider_dropdown,
@@ -99,12 +100,15 @@ def compose_instruction(
     reference_url: str | None,
     controller_type: OutputFormat | None,
     data_items: list[str] | None = None,
+    common_instruction: str | None = None,
 ) -> str:
     """
     目的・詳細・参考URL・データ項目・出力形式から自然な指示文を生成します。
     空欄は無視し、必要な部分のみを含めます。
     """
     parts = []
+    if common_instruction and common_instruction.strip():
+        parts.append(f"【共通指示】\n{common_instruction.strip()}")
     if purpose:
         parts.append(f"【目的】\n{purpose}")
     if detail:

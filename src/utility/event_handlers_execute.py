@@ -46,13 +46,10 @@ def create_execute_button_handler(
         if output_format_dropdown.value:
             selected_output_format = OutputFormat(output_format_dropdown.value)
         api_key = api_key_field.value
-        if not api_key:
-            env_key = f"{llm_provider_dropdown.value.upper()}_API_KEY"
-            api_key = os.environ.get(env_key, "")
         llm_config = LLMConfig(
-            provider=llm_provider_dropdown.value,
-            model=llm_model_dropdown.value,
-            api_key=api_key,
+            provider=llm_provider_dropdown.value or "",
+            model=llm_model_dropdown.value or "",
+            api_key=api_key or "",
         )
         browser_config = BrowserConfig(
             headless=headless_checkbox.value, keep_alive=keep_alive_checkbox.value

@@ -7,8 +7,11 @@ def compose_instruction(
     reference_url: str | None,
     controller_type: OutputFormat | None,
     data_items: list[str] | None = None,
+    common_instruction: str | None = None,
 ) -> str:
     parts = []
+    if common_instruction and common_instruction.strip():
+        parts.append(f"【共通指示】\n{common_instruction.strip()}")
     if purpose:
         parts.append(f"【目的】\n{purpose}")
     if detail:

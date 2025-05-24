@@ -1,9 +1,6 @@
 import flet as ft
 from flet.core.control_event import ControlEvent
 from src.conponent.ui_components import (
-    create_purpose_field,
-    create_detail_field,
-    create_reference_url_field,
     create_llm_provider_dropdown,
     create_llm_model_dropdown,
     create_api_key_field,
@@ -11,11 +8,11 @@ from src.conponent.ui_components import (
     create_output_format_dropdown,
     create_output_dir_field,
     create_submit_button,
-    create_data_items_row,
 )
-from src.conponent.page_layout import create_page_content
+from src.layout.page_layout import create_page_content
 from src.utility.event_handlers_llm import create_provider_changed_handler
 from src.utility.event_handlers_execute import create_execute_button_handler
+from src.layout.instruction_section import build_instruction_section
 
 LLM_PROVIDERS = ["openrouter", "openai", "google"]
 LLM_MODELS = {
@@ -28,41 +25,39 @@ LLM_MODELS = {
 def setup_app(page: ft.Page):
     page.title = "Browser-Use Agent GUI"
     page.scroll = ft.ScrollMode.AUTO
-    purpose_field = create_purpose_field()
-    detail_field = create_detail_field()
-    reference_url_field = create_reference_url_field()
+    # インストラクション欄の構築
+    instruction = build_instruction_section(page)
+    (
+        common_instruction_field,
+        purpose_field,
+        detail_field,
+        reference_url_field,
+        data_items_row,
+    ) = (
+        instruction["common_instruction_field"],
+        instruction["purpose_field"],
+        instruction["detail_field"],
+        instruction["reference_url_field"],
+        instruction["data_items_row"],
+    )
     output_format_dropdown = create_output_format_dropdown()
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     llm_model_dropdown = create_llm_model_dropdown()
     llm_model_dropdown.visible = False
     api_key_field = create_api_key_field(provider="", visible=False)
     browser_config_row = create_browser_config_section()
+    # CheckBox型で取得
     headless_checkbox = browser_config_row.controls[0]
     keep_alive_checkbox = browser_config_row.controls[1]
+    if not isinstance(headless_checkbox, ft.Checkbox):
+        headless_checkbox = ft.Checkbox()
+    if not isinstance(keep_alive_checkbox, ft.Checkbox):
+        keep_alive_checkbox = ft.Checkbox()
     output_dir_field = create_output_dir_field()
     progress_bar = ft.ProgressBar(width=600, visible=False)
     status_text = ft.Text("", size=16)
     result_text = ft.Text("", size=16)
-    data_items = [""]
-    data_items_row = None
 
-    def on_data_item_submit(e: ControlEvent, idx):
-        nonlocal data_items, data_items_row
-        value = e.control.value
-        if idx < len(data_items):
-            data_items[idx] = value
-        else:
-            data_items.append(value)
-        data_items = [v for v in data_items]
-        if not data_items or data_items[-1] != "":
-            data_items.append("")
-        data_items_row.controls = create_data_items_row(
-            data_items, on_data_item_submit
-        ).controls
-        page.update()
-        data_items_row.controls[-1].focus()
-
-    data_items_row = create_data_items_row(data_items, on_data_item_submit)
     provider_changed = create_provider_changed_handler(
         llm_provider_dropdown, llm_model_dropdown, LLM_MODELS, page
     )
@@ -70,9 +65,10 @@ def setup_app(page: ft.Page):
 
     def on_provider_change(e):
         selected_provider = llm_provider_dropdown.value
-        llm_model_dropdown.options = [
-            ft.dropdown.Option(model) for model in LLM_MODELS.get(selected_provider, [])
-        ]
+        models = (
+            LLM_MODELS[selected_provider] if selected_provider in LLM_MODELS else []
+        )
+        llm_model_dropdown.options = [ft.dropdown.Option(model) for model in models]
         if llm_model_dropdown.options:
             llm_model_dropdown.value = llm_model_dropdown.options[0].key
             llm_model_dropdown.visible = True
@@ -114,6 +110,7 @@ def setup_app(page: ft.Page):
         title="Browser-Use Agent GUI",
         subtitle="AIエージェントのインストラクションと設定",
         instruction_section=[
+            common_instruction_field,
             purpose_field,
             detail_field,
             reference_url_field,
