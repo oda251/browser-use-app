@@ -1,4 +1,5 @@
 flet
+PyInstaller
 dotenv
 langchain-openai
 langchain-google-genai

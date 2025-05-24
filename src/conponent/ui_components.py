@@ -1,5 +1,6 @@
 import flet as ft
 from typing import List
+import os
 
 
 def create_instruction_field() -> ft.TextField:
@@ -38,16 +39,26 @@ def create_llm_model_dropdown() -> ft.Dropdown:
     )
 
 
-def create_api_key_field() -> ft.TextField:
+def create_api_key_field(provider: str = None, visible: bool = True) -> ft.TextField:
     """
     APIキーを入力するためのテキストフィールドを作成します
+    provider: プロバイダー名（例: 'openai', 'google', 'openrouter'）
+    visible: 表示/非表示
     """
+    env_key = None
+    if provider:
+        env_key = f"{provider.upper()}_API_KEY"
+    else:
+        env_key = "OPENAI_API_KEY"  # デフォルト
+    default_value = os.environ.get(env_key, "")
     return ft.TextField(
         label="APIキー",
         hint_text="環境変数が設定されている場合は空のままでもOK",
         password=True,
         can_reveal_password=True,
         width=600,
+        value=default_value,
+        visible=visible,
     )
 
 

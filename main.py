@@ -41,7 +41,8 @@ def main(page: ft.Page):
 
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     llm_model_dropdown = create_llm_model_dropdown()
-    api_key_field = create_api_key_field()
+    # APIキー欄は最初は非表示
+    api_key_field = create_api_key_field(visible=False)
 
     headless_checkbox = create_browser_config_section()
 
@@ -59,6 +60,31 @@ def main(page: ft.Page):
         llm_provider_dropdown, llm_model_dropdown, LLM_MODELS, page
     )
     llm_provider_dropdown.on_change = provider_changed
+
+    def on_provider_change(e):
+        selected_provider = llm_provider_dropdown.value
+        # モデルの選択肢を更新
+        llm_model_dropdown.options = [
+            ft.dropdown.Option(model)
+            for model in LLM_MODELS.get(selected_provider, [])
+        ]
+        if llm_model_dropdown.options:
+            llm_model_dropdown.value = llm_model_dropdown.options[0].key
+        else:
+            llm_model_dropdown.value = None
+        # APIキー欄の表示・値を切り替え
+        if selected_provider:
+            api_key_field.visible = True
+            env_key = f"{selected_provider.upper()}_API_KEY"
+            import os
+
+            api_key_field.value = os.environ.get(env_key, "")
+        else:
+            api_key_field.visible = False
+            api_key_field.value = ""
+        page.update()
+
+    llm_provider_dropdown.on_change = on_provider_change
 
     button_clicked = create_execute_button_handler(
         page=page,
