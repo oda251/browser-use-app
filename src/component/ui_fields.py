@@ -1,6 +1,7 @@
 import flet as ft
 import os
 from src.component.common.custom_fields import CustomTextField
+from src.entity.prompt_templates import COMMON_INSTRUCTION_DEFAULT
 
 
 def create_instruction_field() -> ft.TextField:
@@ -99,10 +100,7 @@ def create_common_instruction_field() -> ft.TextField:
         min_lines=1,
         max_lines=1,
         width=600,
-        value="""あなたはスクレイピングを行うエージェントです。必要な情報を収集し、指定された形式で結果を出力してください。
-始めに訪れたページで情報が不十分だった場合は、適宜リンクをたどって追加情報を収集してください。リンクをクリックする際は、必ず新しいタブで開いてください。
-指示を受けたら、まず保存先のファイルを作成し、そのファイルのパスは最後まで必ず保持してください。収集した情報が50行を超える場合は都度保存し、記憶が大きくなることを避けてください。
-""",
+        value=COMMON_INSTRUCTION_DEFAULT,
         visible=True,
     )
     field.on_focus = lambda e: _expand_lines(e, 3, 10)

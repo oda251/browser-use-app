@@ -2,7 +2,8 @@ import flet as ft
 from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig, Agent
 from src.get_llm import LLMConfig
-from src.component.ui_components import compose_instruction, extract_data_items
+from src.component.ui_components import extract_data_items
+from src.component.ui_instruction import compose_instruction
 from src.global_cache import cache, CacheKey
 import threading
 
@@ -108,7 +109,7 @@ def create_execute_button_handler(
             headless=headless_checkbox.value, keep_alive=keep_alive_checkbox.value
         )
         data_items = extract_data_items(data_item_controls)
-        instruction = compose_instruction(
+        instruction, message_context, context = compose_instruction(
             purpose_field.value,
             detail_field.value,
             reference_url_field.value,
@@ -122,6 +123,8 @@ def create_execute_button_handler(
 
                 agent = get_agent(
                     instruction=instruction,
+                    context=context,
+                    message_context=message_context,
                     llm_config=llm_config,
                     browser_profile=browser_config,
                     output_format=selected_output_format,
