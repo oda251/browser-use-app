@@ -1,5 +1,6 @@
 import flet as ft
 from typing import List
+from src.theme.color import get_highlight_mid
 
 
 def create_page_content(
@@ -8,7 +9,6 @@ def create_page_content(
     instruction_section: list[ft.Control],
     llm_section: list[ft.Control],
     browser_section: list[ft.Control],
-    controller_section: list[ft.Control],
     output_section: list[ft.Control],
     button_section: list[ft.Control],
     result_section: list[ft.Control],
@@ -27,7 +27,7 @@ def create_page_content(
                         ft.Text(subtitle, size=16),
                     ],
                 ),
-                padding=ft.padding.only(bottom=20),
+                padding=ft.padding.only(bottom=10, left=10),
             ),
             # インストラクションセクション
             create_section("インストラクション", instruction_controls),
@@ -35,8 +35,6 @@ def create_page_content(
             create_section("LLM設定", llm_section),
             # ブラウザ設定セクション
             create_section("ブラウザ設定", browser_section),
-            # コントローラー設定セクション
-            create_section("コントローラー設定", controller_section),
             # 出力設定セクション
             create_section("出力設定", output_section),
             # ボタンセクション
@@ -46,6 +44,7 @@ def create_page_content(
         ],
         spacing=20,
         scroll=ft.ScrollMode.AUTO,
+        alignment=ft.MainAxisAlignment.CENTER,
     )
 
 
@@ -56,7 +55,7 @@ def create_section(title: str, controls: List[ft.Control]) -> ft.Container:
     section_controls = []
 
     if title:
-        section_controls.append(ft.Text(title, size=18, weight=ft.FontWeight.BOLD))
+        section_controls.append(ft.Text(title, size=20, weight=ft.FontWeight.BOLD))
 
     section_controls.extend(controls)
 
@@ -66,6 +65,7 @@ def create_section(title: str, controls: List[ft.Control]) -> ft.Container:
             spacing=10,
         ),
         padding=10,
-        border=ft.border.all(1, ft.Colors.BLACK12),
+        border=ft.border.all(1, get_highlight_mid()),
         border_radius=10,
+        width=640,
     )

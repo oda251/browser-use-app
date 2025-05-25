@@ -1,6 +1,6 @@
 import flet as ft
 from flet.core.control_event import ControlEvent
-from src.conponent.ui_components import (
+from src.component.ui_components import (
     create_llm_provider_dropdown,
     create_llm_model_dropdown,
     create_api_key_field,
@@ -119,7 +119,6 @@ def setup_app(page: ft.Page):
         ],
         llm_section=[llm_provider_dropdown, llm_model_dropdown, api_key_field],
         browser_section=[browser_config_row],
-        controller_section=[],
         output_section=[output_dir_field],
         button_section=[submit_button, progress_bar, status_text],
         result_section=[result_text],

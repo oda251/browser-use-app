@@ -1,9 +1,8 @@
 import flet as ft
-import os
 from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig
 from src.get_llm import LLMConfig
-from src.conponent.ui_components import compose_instruction, get_data_items_from_row
+from src.component.ui_components import compose_instruction, get_data_items_from_row
 
 
 def create_execute_button_handler(

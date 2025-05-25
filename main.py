@@ -7,6 +7,7 @@ load_dotenv()
 
 
 def main(page: ft.Page):
+    page.theme_mode = ft.ThemeMode.SYSTEM
     setup_app(page)
 
 

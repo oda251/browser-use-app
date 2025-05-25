@@ -2,6 +2,7 @@ import flet as ft
 from typing import List
 import os
 from src.entity.controller_type import OutputFormat
+from src.component.common.custom_fields import CustomDropdown
 
 # 各種UI生成関数を分割ファイルからインポート
 from .ui_fields import (
@@ -31,7 +32,7 @@ def create_llm_provider_dropdown(providers: List[str]) -> ft.Dropdown:
     """
     LLMプロバイダーを選択するためのドロップダウンを作成します
     """
-    return ft.Dropdown(
+    return CustomDropdown(
         label="LLMプロバイダー",
         width=600,
         options=[ft.dropdown.Option(provider) for provider in providers],
@@ -42,7 +43,7 @@ def create_llm_model_dropdown() -> ft.Dropdown:
     """
     LLMモデルを選択するためのドロップダウンを作成します
     """
-    return ft.Dropdown(
+    return CustomDropdown(
         label="LLMモデル",
         width=600,
         options=[],  # オプションは動的に設定されます
@@ -70,7 +71,7 @@ def create_output_format_dropdown() -> ft.Dropdown:
     """
     from src.entity.controller_type import OutputFormat
 
-    return ft.Dropdown(
+    return CustomDropdown(
         label="出力形式",
         width=600,
         options=[ft.dropdown.Option(fmt.value) for fmt in OutputFormat],

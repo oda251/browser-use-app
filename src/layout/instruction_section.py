@@ -1,6 +1,6 @@
 import flet as ft
 from flet.core.control_event import ControlEvent
-from src.conponent.ui_components import (
+from src.component.ui_components import (
     create_purpose_field,
     create_detail_field,
     create_reference_url_field,
@@ -31,7 +31,10 @@ def build_instruction_section(page: ft.Page):
             data_items, on_data_item_submit
         ).controls
         page.update()
-        data_items_row.controls[-1].focus()
+        # 型チェックでTextFieldのみfocusを呼ぶ
+        last_control = data_items_row.controls[-1]
+        if isinstance(last_control, ft.TextField):
+            last_control.focus()
 
     data_items_row = create_data_items_row(data_items, on_data_item_submit)
     return {
