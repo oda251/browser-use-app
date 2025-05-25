@@ -35,16 +35,15 @@ def setup_app(page: ft.Page):
         detail_field,
         reference_url_field,
         data_item_controls,
+        output_format_dropdown,
     ) = (
         instruction["common_instruction_field"],
         instruction["purpose_field"],
         instruction["detail_field"],
         instruction["reference_url_field"],
         instruction["data_item_controls"],
+        instruction["output_format_dropdown"],
     )
-    # インストラクションインポート・エクスポートUI
-    instruction_button_row = create_instruction_io_buttons(page)
-    output_format_dropdown = create_output_format_dropdown()
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     llm_model_dropdown = create_llm_model_dropdown()
     llm_model_dropdown.visible = False
