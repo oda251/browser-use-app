@@ -39,6 +39,7 @@ def create_execute_button_handler(
     def set_normal_mode():
         submit_button.text = "エージェントを実行"
         submit_button.icon = ft.Icons.PLAY_ARROW
+        submit_button.visible = True
         submit_button.on_click = button_clicked
         page.update()
 
