@@ -19,7 +19,7 @@ def get_controller(
 
             @controller.action(
                 """
-                Document a file in markdown format.
+                Create a markdown file.
                 ARGS:
                     title (str): The title of the file.
                     content (str): The content to be written to the file. Extension is not needed.
@@ -27,13 +27,7 @@ def get_controller(
                     str: The path to the file.
                 """
             )
-            def write_markdown(title: str, content: str) -> str:
-                """
-                Write the content to a file in markdwon format with the given title.
-                ARGS:
-                    title (str): The title of the file.
-                    content (str): The content to be written to the file.
-                """
+            def create_markdown(title: str, content: str) -> str:
                 path = os.path.join(ouput_dir, f"{title}.md")
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(content)
@@ -49,15 +43,7 @@ def get_controller(
                     str: The path to the file.
                 """
             )
-            def append_markdown(filename: str, content: str) -> str:
-                """
-                Append content to an existing markdown file.
-                ARGS:
-                    filename (str): The filename (with .md extension) to append to.
-                    content (str): The content to append.
-                RETURNS:
-                    str: The path to the file.
-                """
+            def pushback_markdown(filename: str, content: str) -> str:
                 path = os.path.join(ouput_dir, filename)
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(content)
@@ -67,26 +53,15 @@ def get_controller(
 
             @controller.action(
                 """
-                Document a file in plain text.
+                Create a plain text file.
                 ARGS:
                     title (str): The title (filename, without extension) for the text file to save.
                     content (str): The content to be written to the file. Extension is not needed.
                 RETURNS:
                     str: The full path to the saved text file.
-                DESCRIPTION:
-                    This function saves the content to a text file with the specified title.
-                    The file will be saved in the output directory.
                 """
             )
-            def write_txt(title: str, content: str) -> str:
-                """
-                Write the content to a file in plain text with the given title.
-                ARGS:
-                    title (str): The title of the file.
-                    content (str): The content to be written to the file.
-                RETURNS:
-                    str: The path to the file.
-                """
+            def create_text(title: str, content: str) -> str:
                 path = os.path.join(ouput_dir, f"{title}.txt")
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(content)
@@ -102,15 +77,7 @@ def get_controller(
                     str: The path to the file.
                 """
             )
-            def append_txt(filename: str, content: str) -> str:
-                """
-                Append content to an existing text file.
-                ARGS:
-                    filename (str): The filename (with .txt extension) to append to.
-                    content (str): The content to append.
-                RETURNS:
-                    str: The path to the file.
-                """
+            def pushback_text(filename: str, content: str) -> str:
                 path = os.path.join(ouput_dir, filename)
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(content)
@@ -120,7 +87,7 @@ def get_controller(
 
             @controller.action(
                 """
-                Document a file in CSV format.
+                Create a CSV file.
                 ARGS:
                     title (str): The title of the file.
                     content (str): The content to be written to the file. Extension is not needed.
@@ -128,15 +95,7 @@ def get_controller(
                     str: The path to the file.
                 """
             )
-            def write_csv(title: str, content: str) -> str:
-                """
-                Write the content to a file in CSV format with the given title.
-                ARGS:
-                    title (str): The title of the file.
-                    content (str): The content to be written to the file.
-                RETURNS:
-                    str: The path to the file.
-                """
+            def create_csv(title: str, content: str) -> str:
                 path = os.path.join(ouput_dir, f"{title}.csv")
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(content)
@@ -152,15 +111,7 @@ def get_controller(
                     str: The path to the file.
                 """
             )
-            def append_csv(filename: str, content: str) -> str:
-                """
-                Append content to an existing CSV file.
-                ARGS:
-                    filename (str): The filename (with .csv extension) to append to.
-                    content (str): The content to append.
-                RETURNS:
-                    str: The path to the file.
-                """
+            def pushback_csv(filename: str, content: str) -> str:
                 path = os.path.join(ouput_dir, filename)
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(content)
