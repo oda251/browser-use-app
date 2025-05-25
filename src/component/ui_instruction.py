@@ -117,13 +117,11 @@ def create_instruction_io_buttons(page: ft.Page):
 
     # エクスポート
     def on_export_click(e):
-        # ここでエクスポートデータを必要に応じて生成
         export_json = json.dumps([], ensure_ascii=False, indent=2)
+        page.set_clipboard(export_json)
         page.open(
             ft.SnackBar(
-                content=ft.Text(
-                    "エクスポート内容をクリップボード等にコピーしてください。"
-                ),
+                content=ft.Text("エクスポート内容をクリップボードにコピーしました。"),
                 open=True,
             )
         )
