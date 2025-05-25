@@ -41,7 +41,7 @@ def get_controller(
                     context (AgentContext): This is injected automatically; you do not need to provide it.
                 """
             )
-            def pushback_markdown(content: str, context: AgentContext):
+            def append_markdown(content: str, context: AgentContext):
                 path = context.output_path
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(content)
@@ -71,7 +71,7 @@ def get_controller(
                     context (AgentContext): This is injected automatically; you do not need to provide it.
                 """
             )
-            def pushback_text(content: str, context: AgentContext):
+            def append_text(content: str, context: AgentContext):
                 path = context.output_path
                 with open(path, "a", encoding="utf-8") as f:
                     f.write(content)
@@ -92,18 +92,21 @@ def get_controller(
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(content)
                 context.output_path = path
+                context.input_column_names(content)
 
             @controller.action(
                 """
-                Append content to a CSV file.
+                Append a list of JSON objects to a CSV file.
                 ARGS:
-                    content (str): The content to append.
+                    content (list): List of JSON objects to append as CSV rows. Each object must have all the specified data item keys as string values. Example: [{"name": "Alice", "age": "30"}, {"name": "Bob", "age": "25"}]
                     context (AgentContext): This is injected automatically; you do not need to provide it.
                 """
             )
-            def pushback_csv(content: str, context: AgentContext):
+            def append_csv(content: list[dict[str, str]], context: AgentContext):
                 path = context.output_path
                 with open(path, "a", encoding="utf-8") as f:
-                    f.write(content)
+                    for item in content:
+                        row = context.json_to_csv_row(item)
+                        f.write(row)
 
     return controller

@@ -2,12 +2,14 @@ from src.entity.controller_type import OutputFormat
 from src.entity.agent_context import AgentContext
 from src.entity.prompt_templates import (
     COMMON_INSTRUCTION_DEFAULT,
-    OUTPUT_FORMAT_MARKDOWN,
-    OUTPUT_FORMAT_MARKDOWN_RULE,
-    OUTPUT_FORMAT_CSV,
-    OUTPUT_FORMAT_CSV_RULE,
-    OUTPUT_FORMAT_TEXT,
-    OUTPUT_FORMAT_TEXT_RULE,
+    INITIAL_MARKDOWN_OUTPUT_PROMPT,
+    RECURRING_MARKDOWN_OUTPUT_PROMPT,
+    INITIAL_JSON_OUTPUT_PROMPT,
+    RECURRING_JSON_OUTPUT_PROMPT,
+    RECURRING_JSON_DATA_COLLECTION_RULE,
+    INITIAL_TEXT_OUTPUT_PROMPT,
+    RECURRING_TEXT_OUTPUT_PROMPT,
+    LINK_FOLLOWING_RULE,
 )
 
 
@@ -48,18 +50,21 @@ def compose_instruction(
     if controller_type:
         match controller_type:
             case OutputFormat.MARKDOWN:
-                parts_main.append(OUTPUT_FORMAT_MARKDOWN)
-                parts_context.append(OUTPUT_FORMAT_MARKDOWN_RULE)
+                parts_main.append(INITIAL_MARKDOWN_OUTPUT_PROMPT)
+                parts_context.append(RECURRING_MARKDOWN_OUTPUT_PROMPT)
             case OutputFormat.CSV:
-                parts_main.append(OUTPUT_FORMAT_CSV)
-                parts_context.append(OUTPUT_FORMAT_CSV_RULE)
+                parts_main.append(INITIAL_JSON_OUTPUT_PROMPT)
+                parts_context.append(RECURRING_JSON_OUTPUT_PROMPT)
+                parts_context.append(RECURRING_JSON_DATA_COLLECTION_RULE)
             case OutputFormat.TEXT:
-                parts_main.append(OUTPUT_FORMAT_TEXT)
-                parts_context.append(OUTPUT_FORMAT_TEXT_RULE)
+                parts_main.append(INITIAL_TEXT_OUTPUT_PROMPT)
+                parts_context.append(RECURRING_TEXT_OUTPUT_PROMPT)
             case _:
                 other_rule = f"[Output Format Rule]\nSave as a file in {controller_type.value} format."
                 parts_main.append(
                     f"[Output Format]\nSave as a file in {controller_type.value} format."
                 )
                 parts_context.append(other_rule)
+    # --- ここで必ずリンク探索ルールを追加 ---
+    parts_context.append(LINK_FOLLOWING_RULE)
     return "\n\n".join(parts_main), "\n\n".join(parts_context), context
