@@ -44,6 +44,7 @@ def setup_app(page: ft.Page):
         instruction["data_item_controls"],
         instruction["output_format_dropdown"],
     )
+    instruction_button_row = create_instruction_io_buttons(page)
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     llm_model_dropdown = create_llm_model_dropdown()
     llm_model_dropdown.visible = False
