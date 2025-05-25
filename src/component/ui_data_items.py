@@ -2,7 +2,7 @@ import flet as ft
 from src.component.common.custom_fields import CustomTextField
 
 
-def create_data_items_row(data_items: list[str], on_submit) -> ft.Row:
+def create_data_item_controls(data_items: list[str], on_submit) -> ft.Column:
     fields = []
     for i, value in enumerate(data_items):
         fields.append(
@@ -22,14 +22,22 @@ def create_data_items_row(data_items: list[str], on_submit) -> ft.Row:
                 on_submit=lambda e, idx=len(data_items): on_submit(e, idx),
             )
         )
-    return ft.Row(controls=fields, spacing=9)
+    # 1行に3つまで、それを超える分は次のRowへ
+    rows = []
+    for i in range(0, len(fields), 3):
+        rows.append(ft.Row(controls=fields[i : i + 3], spacing=9))
+    return ft.Column(controls=rows, spacing=6)
 
 
-def get_data_items_from_row(row: ft.Row) -> list[str]:
-    return [
-        f.value
-        for f in row.controls
-        if isinstance(f, CustomTextField)
-        and f.value is not None
-        and f.value.strip() != ""
-    ]
+def extract_data_items(column: ft.Column) -> list[str]:
+    items = []
+    for row in column.controls:
+        if isinstance(row, ft.Row):
+            for f in row.controls:
+                if (
+                    isinstance(f, CustomTextField)
+                    and f.value is not None
+                    and f.value.strip() != ""
+                ):
+                    items.append(f.value)
+    return items

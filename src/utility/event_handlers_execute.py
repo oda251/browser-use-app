@@ -2,7 +2,7 @@ import flet as ft
 from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig, Agent
 from src.get_llm import LLMConfig
-from src.component.ui_components import compose_instruction, get_data_items_from_row
+from src.component.ui_components import compose_instruction, extract_data_items
 from src.global_cache import cache, CacheKey
 import threading
 
@@ -22,7 +22,7 @@ def create_execute_button_handler(
     progress_bar: ft.ProgressBar,
     status_text: ft.Text,
     result_text: ft.Text,
-    data_items_row: ft.Row,
+    data_item_controls: ft.Column,
     submit_button: ft.ElevatedButton,
     stop_button: ft.ElevatedButton,
 ):
@@ -107,7 +107,7 @@ def create_execute_button_handler(
         browser_config = BrowserConfig(
             headless=headless_checkbox.value, keep_alive=keep_alive_checkbox.value
         )
-        data_items = get_data_items_from_row(data_items_row)
+        data_items = extract_data_items(data_item_controls)
         instruction = compose_instruction(
             purpose_field.value,
             detail_field.value,

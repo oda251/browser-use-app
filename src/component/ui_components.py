@@ -20,8 +20,8 @@ from .ui_dropdowns import (
     create_output_format_dropdown,
 )
 from .ui_data_items import (
-    create_data_items_row,
-    get_data_items_from_row,
+    create_data_item_controls,
+    extract_data_items,
 )
 from .ui_instruction import compose_instruction
 from .ui_buttons import create_submit_button
