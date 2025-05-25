@@ -25,5 +25,3 @@ LINK_FOLLOWING_RULE = (
     "[Link Following Rule]\nWhen opening a link or URL, always open it in a new tab. After collecting the necessary data from a page, close that tab. "
     "You may follow links up to 2 times. If the information is still not found after following 2 links, give up and do not continue searching."
 )
-
-# 追加で必要なテンプレートがあればここに追記
