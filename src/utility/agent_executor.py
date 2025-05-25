@@ -9,7 +9,7 @@ from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig
 from src.get_llm import LLMConfig
 from src.get_agent import get_agent
-from src.component.common.global_cache import get_global
+from src.global_cache import cache, CacheKey
 from typing import List
 import asyncio
 import inspect
@@ -28,16 +28,12 @@ def execute_agent(
     try:
         try:
 
-            def should_stop():
-                return get_global("agent_stop_flag", False)
-
             agent = get_agent(
                 instruction=instruction,
                 llm_config=llm_config,
                 browser_profile=browser_profile,
                 output_format=output_format,
                 output_dir=output_dir,
-                should_stop=should_stop,  # 追加
             )
         except ValueError as ve:
             error_msg = f"エージェント初期化エラー: {str(ve)}\n{traceback.format_exc()}"
@@ -55,7 +51,7 @@ def execute_agent(
                 run_task = asyncio.create_task(agent.run())
                 while not run_task.done():
                     await asyncio.sleep(0.2)
-                    if get_global("agent_stop_flag", False):
+                    if cache.get(CacheKey.STOP, False):
                         if hasattr(agent, "stop"):
                             await maybe_await(agent.stop())
                         break

@@ -1,9 +1,9 @@
 import flet as ft
 from src.entity.controller_type import OutputFormat
-from browser_use import BrowserConfig
+from browser_use import BrowserConfig, Agent
 from src.get_llm import LLMConfig
 from src.component.ui_components import compose_instruction, get_data_items_from_row
-from src.component.common.global_cache import set_global, get_global
+from src.global_cache import cache, CacheKey
 import threading
 
 
@@ -26,17 +26,55 @@ def create_execute_button_handler(
     submit_button: ft.ElevatedButton,
     stop_button: ft.ElevatedButton,
 ):
-    def stop_agent():
-        set_global("agent_stop_flag", True)
-        status_text.value = "エージェントを停止中..."
+    # agent_ref, pause_flagをglobal_cacheで管理
+
+    def set_resume_mode():
+        submit_button.text = "エージェントを再開"
+        submit_button.icon = ft.Icons.PLAY_ARROW
+        submit_button.visible = True
+        submit_button.on_click = resume_agent
         page.update()
 
+    def set_normal_mode():
+        submit_button.text = "エージェントを実行"
+        submit_button.icon = ft.Icons.PLAY_ARROW
+        submit_button.on_click = button_clicked
+        page.update()
+
+    def stop_agent():
+        cache.set(CacheKey.STOP, True)
+        status_text.value = "エージェントを停止中..."
+        agent = cache.get(CacheKey.AGENT, None)
+        if agent and hasattr(agent, "stop"):
+            import asyncio
+
+            def call_stop():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                coro = agent.stop()
+                if asyncio.iscoroutine(coro):
+                    loop.run_until_complete(coro)
+
+            threading.Thread(target=call_stop).start()
+        page.update()
+
+    def resume_agent(e=None):
+        agent = cache.get(CacheKey.AGENT, None)
+        if agent and hasattr(agent, "resume"):
+            cache.set(CacheKey.PAUSE, False)
+            submit_button.visible = False
+            stop_button.visible = True
+            progress_bar.visible = True
+            status_text.value = "エージェントを再開中..."
+            page.update()
+            agent.resume()
+
     def button_clicked(e):
-        if get_global("agent_running", False):
+        if cache.get(CacheKey.RUNNING, False):
             # 既に実行中なら無視
             return
-        set_global("agent_running", True)
-        set_global("agent_stop_flag", False)
+        cache.set(CacheKey.RUNNING, True)
+        cache.set(CacheKey.STOP, False)
         submit_button.visible = False
         stop_button.visible = True
         progress_bar.visible = True
@@ -80,29 +118,37 @@ def create_execute_button_handler(
 
         def run_agent():
             try:
-                from src.utility.agent_executor import execute_agent
+                from src.utility.agent_executor import execute_agent, get_agent
 
-                result = execute_agent(
+                agent = get_agent(
                     instruction=instruction,
                     llm_config=llm_config,
                     browser_profile=browser_config,
                     output_format=selected_output_format,
                     output_dir=output_dir_field.value or "output",
                 )
+                cache.set(CacheKey.AGENT, agent)
+                import asyncio
+
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(agent.run())
                 status_text.value = "完了"
                 result_text.value = str(result)
             except Exception as e:
                 status_text.value = f"エラー: {str(e)}"
                 result_text.value = ""
             finally:
-                set_global("agent_running", False)
-                submit_button.visible = True
+                cache.set(CacheKey.RUNNING, False)
+                set_normal_mode()
                 stop_button.visible = False
                 progress_bar.visible = False
+                cache.set(CacheKey.AGENT, None)
                 page.update()
 
         t = threading.Thread(target=run_agent)
         t.start()
 
     stop_button.on_click = lambda e: stop_agent()
+    set_normal_mode()
     return button_clicked
