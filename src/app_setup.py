@@ -14,7 +14,7 @@ from src.utility.event_handlers_llm import create_provider_changed_handler
 from src.utility.event_handlers_execute import create_execute_button_handler
 from src.layout.instruction_section import build_instruction_section
 from src.component.ui_fields import create_output_dir_field
-from src.component.ui_instruction import create_instruction_dropdown_and_io
+from src.component.ui_instruction import create_instruction_io_buttons
 
 LLM_PROVIDERS = ["openrouter", "openai", "google"]
 LLM_MODELS = {
@@ -43,7 +43,7 @@ def setup_app(page: ft.Page):
         instruction["data_item_controls"],
     )
     # インストラクションインポート・エクスポートUI
-    instruction_button_row = create_instruction_dropdown_and_io(page, instruction)
+    instruction_button_row = create_instruction_io_buttons(page)
     output_format_dropdown = create_output_format_dropdown()
     llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
     llm_model_dropdown = create_llm_model_dropdown()

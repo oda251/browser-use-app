@@ -15,7 +15,6 @@ from src.entity.prompt_templates import (
 )
 import flet as ft
 import json
-from src.entity.instruction_db import InstructionDB
 
 
 def compose_instruction(
@@ -74,36 +73,14 @@ def compose_instruction(
     parts_context.append(LINK_FOLLOWING_RULE)
     return "\n\n".join(parts_main), "\n\n".join(parts_context), context
 
-from src.component.common.custom_fields import CustomDropdown
-from src.theme.color import get_highlight_low
-def create_instruction_dropdown_and_io(
-    page: ft.Page, instruction
-):
+
+def create_instruction_io_buttons(page: ft.Page):
     """
     インストラクションのインポート/エクスポートボタン群を返す。
     戻り値: button_row
     """
-    db = InstructionDB()
-    db.ensure_default("デフォルト", COMMON_INSTRUCTION_DEFAULT)
-    instructions = db.get_instructions()
-    options = [ft.dropdown.Option(str(i[1]), str(i[0])) for i in instructions]
-    dropdown = CustomDropdown(
-        label="テンプレート",
-        width=140,
-        item_height=50,
-        options=options,
-        value=options[0].key if options else None,
-        text_size=12,
-        bgcolor=get_highlight_low(),
-        fill_color=get_highlight_low(),
-    )
     # FilePicker
     file_picker = ft.FilePicker()
-
-    def on_dropdown_change(e):
-        None
-
-    dropdown.on_change = on_dropdown_change
 
     # インポート
     def on_import_result(e: ft.FilePickerResultEvent):
@@ -112,20 +89,21 @@ def create_instruction_dropdown_and_io(
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                for item in data:
-                    db.add_instruction(
-                        item.get("name", "インポート"), item.get("content", "")
+                # ここでインポートデータを必要に応じて処理
+                page.open(
+                    ft.SnackBar(
+                        content=ft.Text("インポート成功: ファイルを読み込みました。"),
+                        open=True,
                     )
-                new_instructions = db.get_instructions()
-                dropdown.options = [
-                    ft.dropdown.Option(str(i[1]), str(i[0])) for i in new_instructions
-                ]
-                dropdown.value = dropdown.options[0].key if dropdown.options else None
-                dropdown.update()
+                )
             except Exception as ex:
-                # エラー時はドロップダウンのラベルを一時的に変更
-                dropdown.label = f"インポート失敗: {ex}"
-                dropdown.update()
+                page.open(
+                    ft.SnackBar(
+                        content=ft.Text(f"インポート失敗: {ex}"),
+                        open=True,
+                    )
+                )
+            page.update()
 
     file_picker.on_result = on_import_result
     import_button = ft.IconButton(
@@ -139,13 +117,8 @@ def create_instruction_dropdown_and_io(
 
     # エクスポート
     def on_export_click(e):
-        all_instructions = db.get_instructions()
-        export_data = [{"name": rec[1], "content": rec[2]} for rec in all_instructions]
-        export_json = json.dumps(export_data, ensure_ascii=False, indent=2)
-        dropdown.label = "エクスポート内容をコピーしてください"
-        dropdown.value = None
-        dropdown.options = dropdown.options  # 強制update
-        dropdown.update()
+        # ここでエクスポートデータを必要に応じて生成
+        export_json = json.dumps([], ensure_ascii=False, indent=2)
         page.open(
             ft.SnackBar(
                 content=ft.Text(
@@ -163,7 +136,7 @@ def create_instruction_dropdown_and_io(
         icon_size=20,
     )
     button_row = ft.Row(
-        [export_button, import_button, dropdown, file_picker],
+        [export_button, import_button, file_picker],
         spacing=8,
         alignment=ft.MainAxisAlignment.START,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
