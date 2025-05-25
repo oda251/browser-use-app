@@ -30,7 +30,7 @@ def create_page_content(
                 padding=ft.padding.only(bottom=10, left=10),
             ),
             # インストラクションセクション
-            create_section("インストラクション", instruction_controls),
+            create_section("", instruction_controls),
             # LLM設定セクション
             create_section("LLM設定", llm_section),
             # ブラウザ設定セクション

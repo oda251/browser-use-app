@@ -39,13 +39,6 @@ def build_instruction_section(page: ft.Page):
 
     data_item_controls = create_data_item_controls(data_items, on_data_item_submit)
     return {
-        "fields": [
-            common_instruction_field,
-            purpose_field,
-            detail_field,
-            reference_url_field,
-            data_item_controls,
-        ],
         "data_item_controls": data_item_controls,
         "purpose_field": purpose_field,
         "detail_field": detail_field,
