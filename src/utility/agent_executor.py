@@ -13,8 +13,6 @@ from src.component.common.global_cache import get_global
 from typing import List
 import asyncio
 import inspect
-import threading
-import time
 
 
 def execute_agent(
@@ -50,51 +48,38 @@ def execute_agent(
             sys.stderr.write(error_msg + "\n")
             raise e
 
-        # エージェントの実行
-        # agent.runは非同期関数である可能性があるので、適切に扱う
         try:
-            # agentのrunメソッドが非同期かどうかをチェック
-            if inspect.iscoroutinefunction(agent.run):
-                async def run_with_stop():
-                    # stopフラグを監視しつつ実行
-                    run_task = asyncio.create_task(agent.run())
-                    while not run_task.done():
-                        await asyncio.sleep(0.2)
-                        if get_global("agent_stop_flag", False):
-                            if hasattr(agent, "stop"):
-                                await maybe_await(agent.stop())
-                            break
-                    try:
-                        return await run_task
-                    except Exception as e:
-                        raise e
 
-                async def maybe_await(val):
-                    if inspect.isawaitable(val):
-                        return await val
-                    return val
-
-                try:
-                    loop = asyncio.get_running_loop()
-                except RuntimeError:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                if loop.is_running():
-                    result = asyncio.run_coroutine_threadsafe(run_with_stop(), loop).result()
-                else:
-                    result = loop.run_until_complete(run_with_stop())
-            else:
-                # 同期関数の場合は逐次stop監視
-                run_thread = threading.Thread(target=agent.run)
-                run_thread.start()
-                while run_thread.is_alive():
-                    time.sleep(0.2)
+            async def run_with_stop():
+                # stopフラグを監視しつつ実行
+                run_task = asyncio.create_task(agent.run())
+                while not run_task.done():
+                    await asyncio.sleep(0.2)
                     if get_global("agent_stop_flag", False):
                         if hasattr(agent, "stop"):
-                            agent.stop()
+                            await maybe_await(agent.stop())
                         break
-                run_thread.join()
-                result = getattr(agent, "result", None)
+                try:
+                    return await run_task
+                except Exception as e:
+                    raise e
+
+            async def maybe_await(val):
+                if inspect.isawaitable(val):
+                    return await val
+                return val
+
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            if loop.is_running():
+                result = asyncio.run_coroutine_threadsafe(
+                    run_with_stop(), loop
+                ).result()
+            else:
+                result = loop.run_until_complete(run_with_stop())
             return result
         except AttributeError:
             # agent.runが存在しない場合
