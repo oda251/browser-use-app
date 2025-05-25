@@ -9,7 +9,12 @@ from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig
 from src.get_llm import LLMConfig
 from src.get_agent import get_agent
+from src.component.common.global_cache import get_global
 from typing import List
+import asyncio
+import inspect
+import threading
+import time
 
 
 def execute_agent(
@@ -24,12 +29,17 @@ def execute_agent(
     """
     try:
         try:
+
+            def should_stop():
+                return get_global("agent_stop_flag", False)
+
             agent = get_agent(
                 instruction=instruction,
                 llm_config=llm_config,
                 browser_profile=browser_profile,
                 output_format=output_format,
                 output_dir=output_dir,
+                should_stop=should_stop,  # 追加
             )
         except ValueError as ve:
             error_msg = f"エージェント初期化エラー: {str(ve)}\n{traceback.format_exc()}"
@@ -43,32 +53,48 @@ def execute_agent(
         # エージェントの実行
         # agent.runは非同期関数である可能性があるので、適切に扱う
         try:
-            import asyncio
-            import inspect
-
             # agentのrunメソッドが非同期かどうかをチェック
             if inspect.iscoroutinefunction(agent.run):
-                # 非同期関数の場合
-                # すでに実行中のイベントループがあればそれを使用、なければ新規作成
+                async def run_with_stop():
+                    # stopフラグを監視しつつ実行
+                    run_task = asyncio.create_task(agent.run())
+                    while not run_task.done():
+                        await asyncio.sleep(0.2)
+                        if get_global("agent_stop_flag", False):
+                            if hasattr(agent, "stop"):
+                                await maybe_await(agent.stop())
+                            break
+                    try:
+                        return await run_task
+                    except Exception as e:
+                        raise e
+
+                async def maybe_await(val):
+                    if inspect.isawaitable(val):
+                        return await val
+                    return val
+
                 try:
                     loop = asyncio.get_running_loop()
                 except RuntimeError:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-
-                # 非同期関数を実行
                 if loop.is_running():
-                    # すでにイベントループが実行中の場合
-                    result = asyncio.run_coroutine_threadsafe(
-                        agent.run(), loop
-                    ).result()
+                    result = asyncio.run_coroutine_threadsafe(run_with_stop(), loop).result()
                 else:
-                    # イベントループが実行中でない場合
-                    result = loop.run_until_complete(agent.run())
+                    result = loop.run_until_complete(run_with_stop())
             else:
-                # 同期関数の場合は普通に実行
-                result = agent.run()
-
+                # 同期関数の場合は逐次stop監視
+                run_thread = threading.Thread(target=agent.run)
+                run_thread.start()
+                while run_thread.is_alive():
+                    time.sleep(0.2)
+                    if get_global("agent_stop_flag", False):
+                        if hasattr(agent, "stop"):
+                            agent.stop()
+                        break
+                run_thread.join()
+                result = getattr(agent, "result", None)
             return result
         except AttributeError:
             # agent.runが存在しない場合

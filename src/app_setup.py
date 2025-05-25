@@ -9,6 +9,7 @@ from src.component.ui_components import (
     create_output_dir_field,
     create_submit_button,
 )
+from src.component.ui_buttons import create_stop_button
 from src.layout.page_layout import create_page_content
 from src.utility.event_handlers_llm import create_provider_changed_handler
 from src.utility.event_handlers_execute import create_execute_button_handler
@@ -87,6 +88,9 @@ def setup_app(page: ft.Page):
         page.update()
 
     llm_provider_dropdown.on_change = on_provider_change
+    submit_button = create_submit_button()
+    stop_button = create_stop_button()
+    stop_button.visible = False
     button_clicked = create_execute_button_handler(
         page=page,
         purpose_field=purpose_field,
@@ -103,8 +107,9 @@ def setup_app(page: ft.Page):
         status_text=status_text,
         result_text=result_text,
         data_items_row=data_items_row,
+        submit_button=submit_button,
+        stop_button=stop_button,
     )
-    submit_button = create_submit_button()
     submit_button.on_click = button_clicked
     page_content = create_page_content(
         title="Browser-Use Agent GUI",
@@ -120,7 +125,7 @@ def setup_app(page: ft.Page):
         llm_section=[llm_provider_dropdown, llm_model_dropdown, api_key_field],
         browser_section=[browser_config_row],
         output_section=[output_dir_field],
-        button_section=[submit_button, progress_bar, status_text],
+        button_section=[submit_button, stop_button, progress_bar, status_text],
         result_section=[result_text],
     )
     page.add(page_content)

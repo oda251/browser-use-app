@@ -10,11 +10,12 @@ def get_agent(
     browser_profile: BrowserConfig,
     output_format: OutputFormat = OutputFormat.MARKDOWN,
     output_dir: str = "output",
+    should_stop=None,  # 追加
 ) -> Agent[None]:
     """
     Get the agent instance with the specified task and controller.
     """
-    return Agent[None](
+    agent = Agent[None](
         task=instruction,
         llm=get_llm(config=llm_config),
         controller=get_controller(
@@ -23,3 +24,7 @@ def get_agent(
         ),
         browser_profile=browser_profile,
     )
+    # Agentにshould_stopをセットできる場合
+    if should_stop is not None:
+        setattr(agent, "should_stop", should_stop)
+    return agent

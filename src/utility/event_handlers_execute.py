@@ -3,6 +3,8 @@ from src.entity.controller_type import OutputFormat
 from browser_use import BrowserConfig
 from src.get_llm import LLMConfig
 from src.component.ui_components import compose_instruction, get_data_items_from_row
+from src.component.common.global_cache import set_global, get_global
+import threading
 
 
 def create_execute_button_handler(
@@ -21,8 +23,25 @@ def create_execute_button_handler(
     status_text: ft.Text,
     result_text: ft.Text,
     data_items_row: ft.Row,
+    submit_button: ft.ElevatedButton,
+    stop_button: ft.ElevatedButton,
 ):
+    def stop_agent():
+        set_global("agent_stop_flag", True)
+        status_text.value = "エージェントを停止中..."
+        page.update()
+
     def button_clicked(e):
+        if get_global("agent_running", False):
+            # 既に実行中なら無視
+            return
+        set_global("agent_running", True)
+        set_global("agent_stop_flag", False)
+        submit_button.visible = False
+        stop_button.visible = True
+        progress_bar.visible = True
+        status_text.value = "エージェントを準備中..."
+        page.update()
         if not purpose_field.value:
             purpose_field.error_text = "目的を入力してください"
             page.update()
@@ -38,9 +57,6 @@ def create_execute_button_handler(
         detail_field.error_text = None
         llm_provider_dropdown.error_text = None
         llm_model_dropdown.error_text = None
-        progress_bar.visible = True
-        status_text.value = "エージェントを準備中..."
-        page.update()
         selected_output_format = OutputFormat.MARKDOWN
         if output_format_dropdown.value:
             selected_output_format = OutputFormat(output_format_dropdown.value)
@@ -61,23 +77,32 @@ def create_execute_button_handler(
             selected_output_format,
             data_items=data_items,
         )
-        try:
-            from src.utility.agent_executor import execute_agent
 
-            result = execute_agent(
-                instruction=instruction,
-                llm_config=llm_config,
-                browser_profile=browser_config,
-                output_format=selected_output_format,
-                output_dir=output_dir_field.value or "output",
-            )
-            status_text.value = "完了"
-            result_text.value = str(result)
-        except Exception as e:
-            status_text.value = f"エラー: {str(e)}"
-            result_text.value = ""
-        finally:
-            progress_bar.visible = False
-            page.update()
+        def run_agent():
+            try:
+                from src.utility.agent_executor import execute_agent
 
+                result = execute_agent(
+                    instruction=instruction,
+                    llm_config=llm_config,
+                    browser_profile=browser_config,
+                    output_format=selected_output_format,
+                    output_dir=output_dir_field.value or "output",
+                )
+                status_text.value = "完了"
+                result_text.value = str(result)
+            except Exception as e:
+                status_text.value = f"エラー: {str(e)}"
+                result_text.value = ""
+            finally:
+                set_global("agent_running", False)
+                submit_button.visible = True
+                stop_button.visible = False
+                progress_bar.visible = False
+                page.update()
+
+        t = threading.Thread(target=run_agent)
+        t.start()
+
+    stop_button.on_click = lambda e: stop_agent()
     return button_clicked
