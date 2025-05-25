@@ -18,6 +18,7 @@ class CacheKey(Enum):
     REFERENCE_URL = "reference_url"
     COMMON_INSTRUCTION = "common_instruction"
     DATA_ITEMS = "data_items"
+    OUTPUT_FORMAT = "output_format"
 
 
 class GlobalCache:
