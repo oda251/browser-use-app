@@ -1,7 +1,6 @@
 from src.entity.controller_type import OutputFormat
 from src.entity.agent_context import AgentContext
 from src.entity.prompt_templates import (
-    COMMON_INSTRUCTION_DEFAULT,
     INITIAL_MARKDOWN_OUTPUT_PROMPT,
     RECURRING_MARKDOWN_OUTPUT_PROMPT,
     INITIAL_JSON_OUTPUT_PROMPT,

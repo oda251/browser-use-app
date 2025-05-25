@@ -12,6 +12,12 @@ class CacheKey(Enum):
     STOP = "stop"
     PAUSE = "pause"
     AGENT = "cache"
+    # --- instruction関連 ---
+    PURPOSE = "purpose"
+    DETAIL = "detail"
+    REFERENCE_URL = "reference_url"
+    COMMON_INSTRUCTION = "common_instruction"
+    DATA_ITEMS = "data_items"
 
 
 class GlobalCache:
