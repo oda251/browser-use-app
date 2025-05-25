@@ -71,12 +71,35 @@ def create_api_key_field(provider: str, visible: bool = True) -> ft.TextField:
     )
 
 
-def create_output_dir_field() -> ft.TextField:
-    return CustomTextField(
+def create_output_dir_field() -> ft.Row:
+    text_field = CustomTextField(
         label="出力ディレクトリ",
         hint_text="結果を保存するディレクトリ",
-        width=600,
+        width=520,
         value="output",
+    )
+    file_picker = ft.FilePicker()
+
+    def pick_folder_result(e: ft.FilePickerResultEvent):
+        if e.path:
+            text_field.value = e.path
+            text_field.update()
+
+    file_picker.on_result = pick_folder_result
+    icon_button = ft.IconButton(
+        icon=ft.Icons.FOLDER,
+        icon_color=ft.Colors.GREY_400,
+        tooltip="フォルダを選択",
+        on_click=lambda e: file_picker.get_directory_path(),
+    )
+    # Rowで右端にIconButtonを配置
+    return ft.Row(
+        [
+            text_field,
+            icon_button,
+            file_picker,
+        ],
+        spacing=8,
     )
 
 

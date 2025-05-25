@@ -6,7 +6,6 @@ from src.component.ui_components import (
     create_api_key_field,
     create_browser_config_section,
     create_output_format_dropdown,
-    create_output_dir_field,
     create_submit_button,
 )
 from src.component.ui_buttons import create_stop_button
@@ -14,6 +13,7 @@ from src.layout.page_layout import create_page_content
 from src.utility.event_handlers_llm import create_provider_changed_handler
 from src.utility.event_handlers_execute import create_execute_button_handler
 from src.layout.instruction_section import build_instruction_section
+from src.component.ui_fields import create_output_dir_field
 
 LLM_PROVIDERS = ["openrouter", "openai", "google"]
 LLM_MODELS = {
@@ -54,7 +54,7 @@ def setup_app(page: ft.Page):
         headless_checkbox = ft.Checkbox()
     if not isinstance(keep_alive_checkbox, ft.Checkbox):
         keep_alive_checkbox = ft.Checkbox()
-    output_dir_field = create_output_dir_field()
+    output_dir_row = create_output_dir_field()
     progress_bar = ft.ProgressBar(width=600, visible=False)
     status_text = ft.Text("", size=16)
     result_text = ft.Text("", size=16)
@@ -102,7 +102,7 @@ def setup_app(page: ft.Page):
         headless_checkbox=headless_checkbox,
         keep_alive_checkbox=keep_alive_checkbox,
         output_format_dropdown=output_format_dropdown,
-        output_dir_field=output_dir_field,
+        output_dir_field=output_dir_row,
         progress_bar=progress_bar,
         status_text=status_text,
         result_text=result_text,
@@ -124,7 +124,7 @@ def setup_app(page: ft.Page):
         ],
         llm_section=[llm_provider_dropdown, llm_model_dropdown, api_key_field],
         browser_section=[browser_config_row],
-        output_section=[output_dir_field],
+        output_section=[output_dir_row],
         button_section=[submit_button, stop_button, progress_bar, status_text],
         result_section=[result_text],
     )

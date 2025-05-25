@@ -19,7 +19,7 @@ def create_execute_button_handler(
     headless_checkbox: ft.Checkbox,
     keep_alive_checkbox: ft.Checkbox,
     output_format_dropdown: ft.Dropdown,
-    output_dir_field: ft.TextField,
+    output_dir_field: ft.Row,  # Row型に変更
     progress_bar: ft.ProgressBar,
     status_text: ft.Text,
     result_text: ft.Text,
@@ -122,6 +122,15 @@ def create_execute_button_handler(
             try:
                 from src.utility.agent_executor import execute_agent, get_agent
 
+                # 出力ディレクトリの値取得
+                text_field = (
+                    output_dir_field.controls[0] if output_dir_field.controls else None
+                )
+                if isinstance(text_field, ft.TextField):
+                    output_dir_value = text_field.value or "output"
+                else:
+                    output_dir_value = "output"
+
                 agent = get_agent(
                     instruction=instruction,
                     context=context,
@@ -129,7 +138,7 @@ def create_execute_button_handler(
                     llm_config=llm_config,
                     browser_profile=browser_config,
                     output_format=selected_output_format,
-                    output_dir=output_dir_field.value or "output",
+                    output_dir=output_dir_value,
                 )
                 cache.set(CacheKey.AGENT, agent)
                 import asyncio
