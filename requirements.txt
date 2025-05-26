@@ -4,3 +4,4 @@ dotenv
 langchain-openai
 langchain-google-genai
 browser-use[memory]==0.2.2
+darkdetect
