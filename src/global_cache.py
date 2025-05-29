@@ -25,11 +25,15 @@ class GlobalCache:
     def __init__(self):
         self.cache = Cache(maxsize=32)
 
-    def set(self, key: CacheKey, value) -> None:
-        self.cache[key.value] = value
+    def set(self, key: CacheKey | str, value) -> None:
+        if isinstance(key, CacheKey):
+            key = key.value
+        self.cache[key] = value
 
-    def get(self, key: CacheKey, default: T) -> T:
-        val = self.cache.get(key.value, default)
+    def get(self, key: CacheKey | str, default: T) -> T:
+        if isinstance(key, CacheKey):
+            key = key.value
+        val = self.cache.get(key, default)
         return cast(T, val)
 
 

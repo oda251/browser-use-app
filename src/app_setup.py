@@ -12,7 +12,12 @@ from src.component.ui_buttons import create_stop_button
 from src.layout.page_layout import create_page_content
 from src.utility.event_handlers_llm import create_provider_changed_handler
 from src.utility.event_handlers_execute import create_execute_button_handler
-from src.layout.instruction_section import build_instruction_section
+from src.layout.section.instruction_section import build_instruction_section
+from src.layout.section.llm_section import build_llm_section
+from src.layout.section.browser_section import build_browser_section
+from src.layout.section.output_section import build_output_section
+from src.layout.section.button_section import build_button_section
+from src.layout.section.result_section import build_result_section
 from src.component.ui_fields import create_output_dir_field
 from src.component.ui_instruction import create_instruction_io_buttons
 
@@ -27,8 +32,15 @@ LLM_MODELS = {
 def setup_app(page: ft.Page):
     page.title = "Browser-Use Agent GUI"
     page.scroll = ft.ScrollMode.AUTO
-    # インストラクション欄の構築
+
+    # --- セクションごとにUI構築 ---
     instruction = build_instruction_section(page)
+    llm = build_llm_section(page)
+    browser = build_browser_section()
+    output = build_output_section()
+    button = build_button_section()
+    result = build_result_section()
+
     (
         common_instruction_field,
         purpose_field,
@@ -45,23 +57,21 @@ def setup_app(page: ft.Page):
         instruction["output_format_dropdown"],
     )
     instruction_button_row = create_instruction_io_buttons(page)
-    llm_provider_dropdown = create_llm_provider_dropdown(LLM_PROVIDERS)
-    llm_model_dropdown = create_llm_model_dropdown()
-    llm_model_dropdown.visible = False
-    api_key_field = create_api_key_field(provider="", visible=False)
-    browser_config_row = create_browser_config_section()
-    # CheckBox型で取得
-    headless_checkbox = browser_config_row.controls[0]
-    keep_alive_checkbox = browser_config_row.controls[1]
-    if not isinstance(headless_checkbox, ft.Checkbox):
-        headless_checkbox = ft.Checkbox()
-    if not isinstance(keep_alive_checkbox, ft.Checkbox):
-        keep_alive_checkbox = ft.Checkbox()
-    output_dir_row = create_output_dir_field()
-    progress_bar = ft.ProgressBar(width=600, visible=False)
-    status_text = ft.Text("", size=16)
-    result_text = ft.Text("", size=16)
 
+    llm_provider_dropdown = llm["llm_provider_dropdown"]
+    llm_model_dropdown = llm["llm_model_dropdown"]
+    api_key_field = llm["api_key_field"]
+    browser_config_row = browser["browser_config_row"]
+    headless_checkbox = browser["headless_checkbox"]
+    keep_alive_checkbox = browser["keep_alive_checkbox"]
+    output_dir_row = output["output_dir_row"]
+    submit_button = button["submit_button"]
+    stop_button = button["stop_button"]
+    progress_bar = button["progress_bar"]
+    status_text = button["status_text"]
+    result_text = result["result_text"]
+
+    # --- LLMプロバイダー変更ハンドラ ---
     provider_changed = create_provider_changed_handler(
         llm_provider_dropdown, llm_model_dropdown, LLM_MODELS, page
     )
@@ -91,9 +101,8 @@ def setup_app(page: ft.Page):
         page.update()
 
     llm_provider_dropdown.on_change = on_provider_change
-    submit_button = create_submit_button()
-    stop_button = create_stop_button()
-    stop_button.visible = False
+
+    # --- 実行ボタンハンドラ ---
     button_clicked = create_execute_button_handler(
         page=page,
         purpose_field=purpose_field,
@@ -114,6 +123,8 @@ def setup_app(page: ft.Page):
         stop_button=stop_button,
     )
     submit_button.on_click = button_clicked
+
+    # --- ページレイアウト構築 ---
     page_content = create_page_content(
         title="Browser-Use Agent GUI",
         subtitle="AIエージェントのインストラクションと設定",
